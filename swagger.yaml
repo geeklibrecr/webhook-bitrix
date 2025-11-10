@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Webhook Bitrix API
+  version: 1.0.0
+  description: API para recibir webhooks desde Bitrix24
+paths:
+  /webhook:
+    post:
+      summary: Recibe eventos desde Bitrix24
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    FIELDS:
+                      type: object
+                      properties:
+                        ID:
+                          type: string
+      responses:
+        '200':
+          description: OK
