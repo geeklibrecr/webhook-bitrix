@@ -22,25 +22,92 @@ paths:
                   properties:
                     FIELDS:
                       type: object
-                      description: Colección abierta de campos Bitrix24; cada clave se conserva tal como llega (tipo ANY).
-                      additionalProperties: {}
+                      description: Colección abierta de campos Bitrix24; se rellenan con `null` si no llegan.
+                      properties:
+                        ID:
+                          type: string
+                          description: ID del negocio.
+                        TITLE:
+                          type: string
+                          description: Título del negocio.
+                        TYPE_ID:
+                          type: string
+                          description: Tipo de negocio (SALE, SERVICE, etc.).
+                        STAGE_ID:
+                          type: string
+                          description: Etapa actual del negocio.
+                        CATEGORY_ID:
+                          type: string
+                          description: Pipeline ID.
+                        OPPORTUNITY:
+                          type: number
+                          format: double
+                          description: Monto del trato.
+                        CURRENCY_ID:
+                          type: string
+                          description: Moneda (USD, CRC, etc.).
+                        DATE_CREATE:
+                          type: string
+                          format: date-time
+                          description: Fecha de creación.
+                        ASSIGNED_BY_FULL_NAME:
+                          type: string
+                          description: Nombre completo del responsable.
+                        ASSIGNED_BY_EMAIL:
+                          type: string
+                          format: email
+                          description: Email del responsable.
+                        CONTACT_ID:
+                          type: string
+                        CONTACT_NAME:
+                          type: string
+                        CONTACT_SECOND_NAME:
+                          type: string
+                        CONTACT_LAST_NAME:
+                          type: string
+                        CONTACT_FULL_NAME:
+                          type: string
+                        CONTACT_EMAIL:
+                          type: string
+                          format: email
+                        CONTACT_PHONE:
+                          type: string
+                        COMPANY_ID:
+                          type: string
+                        COMPANY_TITLE:
+                          type: string
+                        COMPANY_PHONE:
+                          type: string
+                        COMPANY_EMAIL:
+                          type: string
+                          format: email
+                      additionalProperties: true
                   additionalProperties: true
             example:
               event: ONCRMDEALUPDATE
               data:
                 FIELDS:
-                  ID: "{{ID}}"
-                  DEAL_ID: "{{ID}}"
-                  CONTACT_FULL_NAME: "{{Contacto: Nombre}}"
-                  CONTACT_NAME: "{{CONTACT_NAME}}"
-                  CONTACT_SECOND_NAME: "{{Contacto: Segundo Nombre}}"
-                  CONTACT_LAST_NAME: "{{Contacto: Apellido}}"
-                  SUM: "{{OPPORTUNITY}}"
-                  AMOUNT: "{{Monto}}"
-                  CURRENCY: "{{Importe (en moneda contable)}}"
-                  CONTACT_EMAIL: "{{CONTACT_EMAIL}}"
-                  CONTACT_PHONE: "{{Contacto: Teléfono}}"
-                  ADDRESS: "{{Contacto: Dirección}}"
+                  ID: "123"
+                  TITLE: "Negocio de prueba"
+                  TYPE_ID: "SALE"
+                  STAGE_ID: "NEW"
+                  CATEGORY_ID: "1"
+                  OPPORTUNITY: 1500.5
+                  CURRENCY_ID: "USD"
+                  DATE_CREATE: "2024-05-01T10:15:00Z"
+                  ASSIGNED_BY_FULL_NAME: "Ana Pérez"
+                  ASSIGNED_BY_EMAIL: "ana@example.com"
+                  CONTACT_ID: "45"
+                  CONTACT_NAME: "Luis"
+                  CONTACT_SECOND_NAME: "Andrés"
+                  CONTACT_LAST_NAME: "Gómez"
+                  CONTACT_FULL_NAME: "Luis Andrés Gómez"
+                  CONTACT_EMAIL: "luis@example.com"
+                  CONTACT_PHONE: "+50688887777"
+                  COMPANY_ID: "77"
+                  COMPANY_TITLE: "Empresa Demo"
+                  COMPANY_PHONE: "+50640001111"
+                  COMPANY_EMAIL: "contacto@empresa.demo"
       responses:
         '200':
           description: OK
