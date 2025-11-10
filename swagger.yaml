@@ -18,77 +18,29 @@ paths:
                   type: string
                 data:
                   type: object
+                  description: Objeto libre con la información enviada por Bitrix24.
                   properties:
                     FIELDS:
                       type: object
-                      properties:
-                        ID:
-                          type: string
-                          description: Identificador único del deal/invoice recibido.
-                        DEAL_ID:
-                          type: string
-                          description: Alternativa para el identificador.
-                        CONTACT_FULL_NAME:
-                          type: string
-                          description: Nombre completo del cliente suministrado por Bitrix.
-                        CONTACT_NAME:
-                          type: string
-                          description: Primer nombre del cliente (se concatena para formar el nombre completo si no existe CONTACT_FULL_NAME).
-                        CONTACT_SECOND_NAME:
-                          type: string
-                          description: Segundo nombre del cliente.
-                        CONTACT_LAST_NAME:
-                          type: string
-                          description: Apellido del cliente.
-                        TITLE:
-                          type: string
-                          description: Título del deal; se usa como respaldo si no se recibe un nombre explícito.
-                        OPPORTUNITY:
-                          type: number
-                          description: Monto estimado de la factura (equivalente al importe del deal).
-                        SUM:
-                          type: number
-                          description: Alternativa para el monto recibido en eventos de factura.
-                        AMOUNT:
-                          type: number
-                          description: Alternativa adicional para el monto.
-                        PRICE:
-                          type: number
-                          description: Precio o valor total enviado por Bitrix.
-                        CONTACT_EMAIL:
-                          type: string
-                          format: email
-                          description: Email del cliente.
-                        CONTACT_EMAILS:
-                          type: array
-                          description: Lista de emails del cliente en formato Bitrix (array de objetos VALUE).
-                          items:
-                            oneOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  VALUE:
-                                    type: string
-                        EMAIL:
-                          type: string
-                          format: email
-                          description: Email alternativo enviado en el payload.
-                        CONTACT_PHONE:
-                          type: string
-                          description: Teléfono principal del cliente.
-                        CONTACT_PHONES:
-                          type: array
-                          description: Lista de teléfonos del cliente en formato Bitrix (array de objetos VALUE).
-                          items:
-                            oneOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  VALUE:
-                                    type: string
-                        PHONE:
-                          type: string
-                          description: Teléfono alternativo recibido.
+                      description: Colección abierta de campos Bitrix24; cada clave se conserva tal como llega (tipo ANY).
+                      additionalProperties: {}
+                  additionalProperties: true
+            example:
+              event: ONCRMDEALUPDATE
+              data:
+                FIELDS:
+                  ID: "{{ID}}"
+                  DEAL_ID: "{{ID}}"
+                  CONTACT_FULL_NAME: "{{Contacto: Nombre}}"
+                  CONTACT_NAME: "{{CONTACT_NAME}}"
+                  CONTACT_SECOND_NAME: "{{Contacto: Segundo Nombre}}"
+                  CONTACT_LAST_NAME: "{{Contacto: Apellido}}"
+                  SUM: "{{OPPORTUNITY}}"
+                  AMOUNT: "{{Monto}}"
+                  CURRENCY: "{{Importe (en moneda contable)}}"
+                  CONTACT_EMAIL: "{{CONTACT_EMAIL}}"
+                  CONTACT_PHONE: "{{Contacto: Teléfono}}"
+                  ADDRESS: "{{Contacto: Dirección}}"
       responses:
         '200':
           description: OK
