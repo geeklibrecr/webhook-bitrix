@@ -91,11 +91,18 @@ exports.renderPrintQueueHtml = async (req, res) => {
         <td><a class="link" href="/printqueue/json/${it._id}" target="_blank">VER</a></td>
         <td><span class="badge ${statusClass}">${statusLabel}</span></td>
         <td>${esc(pad(f.TITLE))}</td>
-        <td>${esc(pad(f.STAGE_ID))}</td>
-        <td>${esc(pad(f.CATEGORY_ID))}</td>
         <td class="num">${esc(amount)}</td>
         <td>${esc(cur)}</td>
         <td>${esc(fmtDate(f.DATE_CREATE))}</td>
+        <td>${esc(pad(f.DESTINATARIO))}</td>
+        <td>${esc(pad(f.TELEFONO))}</td>
+        <td>${esc(pad(f.PROVINCIA))}</td>
+        <td>${esc(pad(f.CANTON))}</td>
+        <td>${esc(pad(f.DISTRITO))}</td>
+        <td>${esc(pad(f.CODIGO_POSTAL))}</td>
+        <td>${esc(pad(f.DETALLE_DIRECCION))}</td>
+        <td>${esc(pad(f.NUMERO_REFERENCIA))}</td>
+        <td>${esc(pad(f.DETALLE_REFERENCIA))}</td>
       </tr>`;
     }).join('');
 
@@ -152,11 +159,18 @@ exports.renderPrintQueueHtml = async (req, res) => {
           <th>Detalles</th>
           <th>Status</th>
           <th>TITLE</th>
-          <th>STAGE_ID</th>
-          <th>CATEGORY_ID</th>
           <th>OPPORTUNITY</th>
           <th>CURRENCY_ID</th>
           <th>DATE_CREATE</th>
+          <th>DESTINATARIO</th>
+          <th>TELEFONO</th>
+          <th>PROVINCIA</th>
+          <th>CANTON</th>
+          <th>DISTRITO</th>
+          <th>CODIGO_POSTAL</th>
+          <th>DETALLE_DIRECCION</th>
+          <th>NUMERO_REFERENCIA</th>
+          <th>DETALLE_REFERENCIA</th>
         </tr>
       </thead>
       <tbody>
@@ -260,6 +274,11 @@ exports.imprimirEtiqueta = async (req, res) => {
         <div class="title">${(f.TITLE || 'Etiqueta').toString().slice(0, 60)}</div>
         <div class="small">ID: <span class="strong">${idStr}</span></div>
         <div class="small">Cliente: ${(f.CONTACT_FULL_NAME || f.COMPANY_TITLE || '').toString().slice(0, 40)}</div>
+        <div class="small">Destinatario: ${escapeHtml((f.DESTINATARIO || '').toString()).slice(0, 50)}</div>
+        <div class="small">Teléfono: ${escapeHtml((f.TELEFONO || '').toString()).slice(0, 30)}</div>
+        <div class="small">Dirección: ${escapeHtml([f.PROVINCIA, f.CANTON, f.DISTRITO].filter(Boolean).join(', '))} ${f.CODIGO_POSTAL ? '('+escapeHtml(f.CODIGO_POSTAL.toString())+')' : ''}</div>
+        <div class="small">Detalle dirección: ${escapeHtml((f.DETALLE_DIRECCION || '').toString()).slice(0, 70)}</div>
+        <div class="small">Referencia: ${escapeHtml((f.NUMERO_REFERENCIA || '').toString())} ${escapeHtml((f.DETALLE_REFERENCIA || '').toString()).slice(0, 60)}</div>
         <div class="small">Monto: ${formatAmount(amount)} ${currency && amount != null ? '' : ''}</div>
         <div class="small">Fecha: ${createdAt ? createdAt.toLocaleDateString('es-CR') : ''}</div>
         <div class="small">Enlace: ${linkUrl}</div>

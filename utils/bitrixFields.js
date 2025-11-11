@@ -3,17 +3,12 @@ const EXPECTED_FIELDS = [
   'ID',
   'TITLE',
   'TYPE_ID',
-  'STAGE_ID',
-  'CATEGORY_ID',
   'OPPORTUNITY',
   'CURRENCY_ID',
   'DATE_CREATE',
   'ASSIGNED_BY_FULL_NAME',
   'ASSIGNED_BY_EMAIL',
   'CONTACT_ID',
-  'CONTACT_NAME',
-  'CONTACT_SECOND_NAME',
-  'CONTACT_LAST_NAME',
   'CONTACT_FULL_NAME',
   'CONTACT_EMAIL',
   'CONTACT_PHONE',
@@ -21,6 +16,16 @@ const EXPECTED_FIELDS = [
   'COMPANY_TITLE',
   'COMPANY_PHONE',
   'COMPANY_EMAIL',
+  // Campos personalizados de texto
+  'DESTINATARIO',
+  'TELEFONO',
+  'PROVINCIA',
+  'CANTON',
+  'DISTRITO',
+  'CODIGO_POSTAL',
+  'DETALLE_DIRECCION',
+  'NUMERO_REFERENCIA',
+  'DETALLE_REFERENCIA',
 ];
 
 function normalizeFields(fieldsInput = {}) {
@@ -36,8 +41,25 @@ function normalizeFields(fieldsInput = {}) {
   }, {});
 
   const mergedFields = { ...normalizedFields, ...extraFields };
+
+  // Forzar a string los campos personalizados de texto cuando vengan definidos
+  const TEXT_FIELDS = [
+    'DESTINATARIO',
+    'TELEFONO',
+    'PROVINCIA',
+    'CANTON',
+    'DISTRITO',
+    'CODIGO_POSTAL',
+    'DETALLE_DIRECCION',
+    'NUMERO_REFERENCIA',
+    'DETALLE_REFERENCIA',
+  ];
+  for (const key of TEXT_FIELDS) {
+    if (mergedFields[key] !== null && mergedFields[key] !== undefined) {
+      mergedFields[key] = String(mergedFields[key]);
+    }
+  }
   return { normalizedFields, extraFields, mergedFields };
 }
 
 module.exports = { EXPECTED_FIELDS, normalizeFields };
-
