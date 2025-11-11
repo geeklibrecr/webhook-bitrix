@@ -1,4 +1,4 @@
-const PrintQueueItem = require('../models/PrintQueueItem');
+﻿const PrintQueueItem = require('../models/PrintQueueItem');
 
 // Enlace base para el QR; sobreescribible por entorno
 const QR_LINK_BASE = process.env.QR_LINK_BASE || 'https://dev.example.com/bitrix/deal';
@@ -11,7 +11,7 @@ exports.listPrintQueue = async (req, res) => {
     if (status && !allowed.includes(status)) {
       return res.status(400).json({
         status: 'error',
-        message: `Estado inválido. Valores permitidos: ${allowed.join(', ')}`,
+        message: `Estado invÃ¡lido. Valores permitidos: ${allowed.join(', ')}`,
       });
     }
 
@@ -20,7 +20,7 @@ exports.listPrintQueue = async (req, res) => {
 
     res.status(200).json({ status: 'ok', count: items.length, items });
   } catch (err) {
-    console.error('Error listando cola de impresión:', err.message);
+    console.error('Error listando cola de impresiÃ³n:', err.message);
     res.status(500).json({ status: 'error', message: 'Error interno', error: err.message });
   }
 };
@@ -37,7 +37,7 @@ exports.updatePrintQueueStatus = async (req, res) => {
     if (!allowed.includes(status)) {
       return res.status(400).json({
         status: 'error',
-        message: `Estado inválido. Valores permitidos: ${allowed.join(', ')}`,
+        message: `Estado invÃ¡lido. Valores permitidos: ${allowed.join(', ')}`,
       });
     }
 
@@ -114,7 +114,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Cola de Impresión</title>
+  <title>Cola de ImpresiÃ³n</title>
   <style>
     body { font-family: Inter, system-ui, Arial, sans-serif; background:#f7f7fb; margin:24px; color:#1f2937; }
     h1 { font-size: 22px; margin-bottom: 12px; }
@@ -143,7 +143,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
   </script>
   </head>
   <body>
-    <h1>Cola de Impresión</h1>
+    <h1>Cola de ImpresiÃ³n</h1>
     <div class="toolbar">
       <span class="pill">Origen: /printqueue</span>
       <span class="pill">Actualizado: ${esc(new Date().toLocaleString('es-CR'))}</span>
@@ -188,7 +188,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
   }
 };
 
-// Devuelve JSON de un item puntual (apoyo para el botón VER)
+// Devuelve JSON de un item puntual (apoyo para el botÃ³n VER)
 exports.getPrintQueueItemJson = async (req, res) => {
   try {
     const { id } = req.params;
@@ -226,8 +226,18 @@ exports.imprimirEtiqueta = async (req, res) => {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
-
     
+    // Datos formateados para la etiqueta
+    const remitenteNombre = (f.COMPANY_TITLE || f.ASSIGNED_BY_FULL_NAME || '').toString();
+    const remitenteTelefono = (f.COMPANY_PHONE || f.CONTACT_PHONE || f.TELEFONO || '').toString();
+    const fechaOrden = createdAt ? createdAt.toLocaleDateString('es-CR') : '';
+    const destinatario = (f.DESTINATARIO || '').toString();
+    const telDest = (f.TELEFONO || '').toString();
+    const direccionLinea = [f.PROVINCIA, f.CANTON, f.DISTRITO].filter(Boolean).map(v => String(v).toUpperCase()).join(', ');
+    const detalleDir = (f.DETALLE_DIRECCION || '').toString();
+    const ref1 = (f.NUMERO_REFERENCIA || '').toString();
+    const ref2 = (f.DETALLE_REFERENCIA || '').toString();
+
 
     const html = `<!doctype html>
 <html lang="es">
@@ -235,62 +245,65 @@ exports.imprimirEtiqueta = async (req, res) => {
   <meta charset="utf-8" />
   <title>Etiqueta</title>
   <style>
-    @page { size: 100mm 100mm; margin: 5mm; }
+    @page { size: 100mm 120mm; margin: 5mm; }
     body { margin: 0; font-family: Arial, sans-serif; }
     .label {
-      width: 100mm; height: 100mm; padding: 4mm; box-sizing: border-box;
+      width: 100mm; height: 120mm; padding: 4mm; box-sizing: border-box;
       display: flex; flex-direction: column; justify-content: space-between;
-      border: 1px dashed #999;
+      border: 1px solid #000;
     }
-    .row { display: flex; justify-content: space-between; align-items: baseline; }
+    .row { display: flex; justify-content: space-between; align-items: flex-start; }
     .col { flex: 1; padding-right: 4mm; min-width: 0; }
-    .logo { width: 100%; text-align: center; margin-bottom: 2mm; }
-    .logo img { max-width: 100%; margin-bottom: 2mm; }  
-    .title { font-size: 14pt; font-weight: bold; line-height: 1.1; }
-    .small { font-size: 9pt; color: #333; }
+    .col-remitente { width: calc(100% - 30mm); }  
+    .col-qr { width:26mm;   margin-left: auto; display: flex; justify-content: flex-end;  align-items: flex-start;}
+    .logo { width: 100%; text-align: center; }
+    .logo img { max-width: 100%; }  
+    .small { font-size: 11pt; color: #333; }
     .strong { font-weight: 600; }
-    .qr { width: 30mm; height: 30mm; }
-    .status { text-align: right; margin-bottom: 2mm; }
-    .badge { display: inline-block; padding: 2mm 3mm; font-size: 9pt; border-radius: 4mm; font-weight: 600; color: #fff; }
-    .status-pendiente { background-color: #ff9800; }
-    .status-procesando { background-color: #2196f3; }
-    .status-impreso { background-color: #4caf50; }
-    .status-error { background-color: #f44336; }
-    .table { width: 100%; border-collapse: collapse; font-size: 8pt; }
-    .table th, .table td { border: 1px solid #ddd; padding: 1.5mm; vertical-align: top; }
-    .table th { background: #f5f5f5; text-align: left; white-space: nowrap; }
+    .qr { width: 25mm; height: 25mm; margin-left: auto; display: flex; justify-content: flex-end;  align-items: flex-start;}
+    .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; }
+    .cell { border: 1px solid #000; padding: 2mm; font-size: 9pt; }
+    .guia { font-weight: bold; font-size: 11pt; }
+    table.attempts { width: 100%; border-collapse: collapse; }
+    table.attempts th, table.attempts td { border: 2px solid #000; padding: 2mm; text-align: center; font-size: 9pt; }
   </style>
   <script>window.onload = function(){ window.print && window.print(); };</script>
 </head>
 <body>
   <div class="label">
-    <div class="row">
-      <div class="col">
-        <div class="logo"><img src="https://geeklibre.net/images/LOGO_etiqueta.png" alt="Logo" /></div>  
+    <div class="logo"><img src="https://geeklibre.net/images/LOGO_etiqueta.png" alt="Logo" /></div>
+    <div class="header-grid">
+      <div class="cell">PBX: ${escapeHtml(remitenteTelefono)}</div>
+      <div class="cell">WhatsApp: ${escapeHtml(telDest)}</div>
+    </div>
+    <div class="row small">
+      <div class="col-remitente">
+      <div class="guia">GUIA - ${escapeHtml(idStr)}</div>
+      <span class="strong">Remitente:</span> ${escapeHtml(remitenteNombre)}<br/>
+      <span class="strong">Tel&eacute;fono:</span> ${escapeHtml(remitenteTelefono)} <br/>
+      <span class="strong">Fecha Orden:</span> ${escapeHtml(fechaOrden)} <br/>
+      <hr/>
+      </div>
+      <div class="col-qr">
+        ${qrUrl ? `<img class="qr" src="${qrUrl}" alt="QR ${escapeHtml(idStr)}" />` : ''}
       </div>
     </div>
     <div class="row">
-      <div class="col">
-        <div class="title">${(f.TITLE || 'Etiqueta').toString().slice(0, 60)}</div>
-        <div class="small">ID: <span class="strong">${idStr}</span></div>
-        <div class="small">Cliente: ${(f.CONTACT_FULL_NAME || f.COMPANY_TITLE || '').toString().slice(0, 40)}</div>
-        <div class="small">Destinatario: ${escapeHtml((f.DESTINATARIO || '').toString()).slice(0, 50)}</div>
-        <div class="small">Teléfono: ${escapeHtml((f.TELEFONO || '').toString()).slice(0, 30)}</div>
-        <div class="small">Dirección: ${escapeHtml([f.PROVINCIA, f.CANTON, f.DISTRITO].filter(Boolean).join(', '))} ${f.CODIGO_POSTAL ? '('+escapeHtml(f.CODIGO_POSTAL.toString())+')' : ''}</div>
-        <div class="small">Detalle dirección: ${escapeHtml((f.DETALLE_DIRECCION || '').toString()).slice(0, 70)}</div>
-        <div class="small">Referencia: ${escapeHtml((f.NUMERO_REFERENCIA || '').toString())} ${escapeHtml((f.DETALLE_REFERENCIA || '').toString()).slice(0, 60)}</div>
-        <div class="small">Monto: ${formatAmount(amount)} ${currency && amount != null ? '' : ''}</div>
-        <div class="small">Fecha: ${createdAt ? createdAt.toLocaleDateString('es-CR') : ''}</div>
-        <div class="small">Enlace: ${linkUrl}</div>
+      <div class="col small">
+        <div><span class="strong">Destinatario:</span> ${escapeHtml((f.DESTINATARIO || '').toString()).slice(0, 50)}</div>
+        <div><span class="strong">Tel&eacute;fono:</span> ${escapeHtml((f.TELEFONO || '').toString()).slice(0, 30)}</div>
+        <div><span class="strong">Direcci&oacute;n:</span> ${escapeHtml([f.PROVINCIA, f.CANTON, f.DISTRITO].filter(Boolean).join(', '))} ${f.CODIGO_POSTAL ? '('+escapeHtml(f.CODIGO_POSTAL.toString())+')' : ''}</div>
+        <div>${escapeHtml((f.DETALLE_DIRECCION || '').toString()).slice(0, 70)}</div>
+        <div><span class="strong">Monto:</span> ${formatAmount(amount)} ${currency && amount != null ? '' : ''}</div>
+        <div><span class="strong">Referencia:</span> ${escapeHtml((f.NUMERO_REFERENCIA || '').toString())} ${escapeHtml((f.DETALLE_REFERENCIA || '').toString()).slice(0, 60)}</div>
+        <div><span class="strong">Referencia 2:</span> ${escapeHtml((f.DETALLE_REFERENCIA || '').toString())} ${escapeHtml((f.DETALLE_REFERENCIA || '').toString()).slice(0, 60)}</div>
+        <!-- <div ">Enlace: ${linkUrl}</div> -->
       </div>
     </div>
-    
-    <div class="row">
-      <div class="col">
-        <div class="logo">${qrUrl ? `<img class="qr" src="${qrUrl}" alt="QR ${idStr}" />` : ''}</div>  
-      </div>
-    </div>
-    <div class="small">Responsable: ${(f.ASSIGNED_BY_FULL_NAME || '').toString().slice(0, 40)}</div>
+    <table class="attempts">
+      <thead><tr><th>Intento 1</th><th>Intento 2</th><th>Intento 3</th></tr></thead>
+      <tbody><tr><td></td><td></td><td></td></tr></tbody>
+    </table>
   </div>
 </body>
 </html>`;
@@ -303,3 +316,4 @@ exports.imprimirEtiqueta = async (req, res) => {
     return res.status(500).json({ status: 'error', message: 'Error generando etiqueta', error: err.message });
   }
 };
+
