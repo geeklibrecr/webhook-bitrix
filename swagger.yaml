@@ -1,4 +1,4 @@
-﻿openapi: 3.0.0
+openapi: 3.0.0
 info:
   title: Webhook Bitrix API
   version: 1.0.0
@@ -18,18 +18,18 @@ paths:
                   type: string
                 data:
                   type: object
-                  description: Objeto libre con la informaciÃ³n enviada por Bitrix24.
+                  description: Objeto libre con la información enviada por Bitrix24.
                   properties:
                     FIELDS:
                       type: object
-                      description: ColecciÃ³n abierta de campos Bitrix24; se rellenan con `null` si no llegan.
+                      description: Colección abierta de campos Bitrix24; se rellenan con `null` si no llegan.
                       properties:
                         ID:
                           type: string
                           description: ID del negocio.
                         TITLE:
                           type: string
-                          description: TÃ­tulo del negocio.
+                          description: Título del negocio.
                         TYPE_ID:
                           type: string
                           description: Tipo de negocio (SALE, SERVICE, etc.).
@@ -44,7 +44,7 @@ paths:
                         DATE_CREATE:
                           type: string
                           format: date-time
-                          description: Fecha de creaciÃ³n.
+                          description: Fecha de creación.
                         ASSIGNED_BY_FULL_NAME:
                           type: string
                           description: Nombre completo del responsable.
@@ -125,7 +125,7 @@ paths:
           description: OK
   /printqueue:
     get:
-      summary: Lista items de la cola de impresiÃ³n
+      summary: Lista items de la cola de impresión
       parameters:
         - in: query
           name: status
@@ -154,7 +154,7 @@ paths:
                       properties:
                         _id:
                           type: string
-                          description: ID del Ã­tem en cola
+                          description: ID del ítem en cola
                         fields:
                           type: object
                           description: Objeto con los FIELDS recibidos
@@ -204,7 +204,7 @@ paths:
                     type: object
                     description: Item actualizado
         '400':
-          description: Solicitud invÃ¡lida
+          description: Solicitud inválida
         '404':
           description: Item no encontrado
   /printqueue/imprimir/{id}:
@@ -229,3 +229,110 @@ paths:
                         updatedAt:
                           type: string
                           format: date-time
+  /clients:
+    get:
+      description: 'Lee directamente desde MongoDB Atlas (DB: webhookbitrix, colecci?n: lars_clients) y devuelve todos los documentos tal cual se almacenan.'
+      description: 'Lee directamente desde MongoDB Atlas (DB: bitrix_handler, colecci?n: lars_clients) y devuelve todos los documentos tal cual se almacenan.'
+      parameters:
+        - in: query
+          name: bitrixId
+          schema:
+            type: integer
+          required: false
+          description: Filtra por el identificador numerico del registro en Bitrix.
+        - in: query
+          name: entityType
+          schema:
+            type: string
+          required: false
+          description: Filtra por el tipo de entidad (`company`, `contact`, etc.).
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: false
+          description: Numero de pagina a devolver (1 por defecto).
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+          required: false
+          description: Tamano de pagina (50 por defecto, maximo 500). El parametro `limit` se acepta como alias para compatibilidad.
+      responses:
+        '200':
+          description: Lista de clientes obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  count:
+                    type: integer
+                    example: 2
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 50
+                      total:
+                        type: integer
+                        example: 120
+                      totalPages:
+                        type: integer
+                        example: 3
+                      hasMore:
+                        type: boolean
+                        example: true
+                  clients:
+                    type: array
+                    description: Documentos completos tal como se guardan en la colecci?n.
+                    items:
+                      type: object
+                      additionalProperties: true
+              example:
+                status: ok
+                count: 1
+                pagination:
+                  page: 1
+                  pageSize: 50
+                  total: 21
+                  totalPages: 1
+                  hasMore: false
+                clients:
+                  - _id:
+                      $oid: 69154f735fa533aab499ec1b
+                    bitrixId: 42
+                    entityType: company
+                    payload:
+                      ID: "42"
+                      TITLE: Denarios TECH
+                      COMPANY_TYPE: SUPPLIER
+                      INDUSTRY: IT
+                      COMMENTS: ""
+                      REVENUE: "100000000"
+                      CURRENCY_ID: CRC
+                      ASSIGNED_BY_ID: "20"
+                      DATE_CREATE: "2025-11-11T20:01:29+03:00"
+                      LAST_ACTIVITY_TIME: "2025-11-11T20:01:29+03:00"
+                      PHONE:
+                        - ID: "194"
+                          VALUE_TYPE: WORK
+                          VALUE: "+50622612182"
+                          TYPE_ID: PHONE
+                      EMAIL:
+                        - ID: "196"
+                          VALUE_TYPE: WORK
+                          VALUE: denarios.info@gmail.com
+                          TYPE_ID: EMAIL
+                    syncedAt:
+                      $date: "2025-11-13T03:28:26.575Z"
