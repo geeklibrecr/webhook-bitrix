@@ -168,6 +168,35 @@ paths:
                         createdAt:
                           type: string
                           format: date-time
+  /printqueue/{id}:
+    get:
+      summary: Obtiene la informaci��n de un item espec��fico de la cola
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID del item en cola
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  item:
+                    type: object
+                    description: Item encontrado
+                    additionalProperties: true
+        '404':
+          description: Item no encontrado
+        '500':
+          description: Error interno del servidor
   /printqueue/{id}/status:
     patch:
       summary: Actualiza el estado de un item de la cola

@@ -1,7 +1,7 @@
 ﻿const PrintQueueItem = require('../models/PrintQueueItem');
 
 // Enlace base para el QR; sobreescribible por entorno
-const QR_LINK_BASE = process.env.QR_LINK_BASE || 'https://dev.example.com/bitrix/deal';
+const QR_LINK_BASE = process.env.QR_LINK_BASE || 'http://52.233.84.183:38800/formulario';
 
 exports.listPrintQueue = async (req, res) => {
   try {
@@ -189,7 +189,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
 };
 
 // Devuelve JSON de un item puntual (apoyo para el botÃ³n VER)
-exports.getPrintQueueItemJson = async (req, res) => {
+async function getPrintQueueItemHandler(req, res) {
   try {
     const { id } = req.params;
     const item = await PrintQueueItem.findById(id).lean();
@@ -199,7 +199,10 @@ exports.getPrintQueueItemJson = async (req, res) => {
     console.error('Error obteniendo item:', err.message);
     return res.status(500).json({ status: 'error', message: 'Error interno', error: err.message });
   }
-};
+}
+
+exports.getPrintQueueItem = getPrintQueueItemHandler;
+exports.getPrintQueueItemJson = getPrintQueueItemHandler;
 
 exports.imprimirEtiqueta = async (req, res) => {
   try {
@@ -211,11 +214,12 @@ exports.imprimirEtiqueta = async (req, res) => {
 
     const f = item.fields || {};
     const idStr = (f.ID ?? '').toString().trim();
+    const queueId = item._id ? item._id.toString() : '';
     const currency = (f.CURRENCY_ID || '').toString();
     const amount = f.OPPORTUNITY != null ? Number(f.OPPORTUNITY) : null;
     const formatAmount = (val) => (val == null || Number.isNaN(val) ? '' : new Intl.NumberFormat('es-CR', { style: 'currency', currency: currency || 'USD' }).format(val));
     const createdAt = f.DATE_CREATE ? new Date(f.DATE_CREATE) : null;
-    const linkUrl = idStr ? `${QR_LINK_BASE}/${encodeURIComponent(idStr)}` : '';
+    const linkUrl = queueId ? `${QR_LINK_BASE}/${encodeURIComponent(queueId)}` : '';
     const qrUrl = linkUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(linkUrl)}` : null;
     const status = item.status || 'pendiente';
     const statusLabel = ({ pendiente: 'Pendiente', procesando: 'Procesando', impreso: 'Impreso', error: 'Error' })[status] || status;
