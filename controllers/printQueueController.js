@@ -275,7 +275,7 @@ exports.imprimirEtiqueta = async (req, res) => {
 </head>
 <body>
   <div class="label">
-    <div class="logo"><img src="https://geeklibre.net/images/LOGO_etiqueta.png" alt="Logo" /></div>
+    <div class="logo"><img src="https://geeklibre.net/images/Logo600_150.png" alt="Logo" /></div>
     <div class="header-grid">
       <div class="cell">PBX: ${escapeHtml(remitenteTelefono)}</div>
       <div class="cell">WhatsApp: ${escapeHtml(telDest)}</div>
