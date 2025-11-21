@@ -1,4 +1,4 @@
-﻿const PrintQueueItem = require('../models/PrintQueueItem');
+const PrintQueueItem = require('../models/PrintQueueItem');
 
 // Enlace base para el QR; sobreescribible por entorno
 const QR_LINK_BASE = process.env.QR_LINK_BASE || 'http://52.233.84.183:38800/formulario';
@@ -11,7 +11,7 @@ exports.listPrintQueue = async (req, res) => {
     if (status && !allowed.includes(status)) {
       return res.status(400).json({
         status: 'error',
-        message: `Estado invÃ¡lido. Valores permitidos: ${allowed.join(', ')}`,
+        message: `Estado inválido. Valores permitidos: ${allowed.join(', ')}`,
       });
     }
 
@@ -20,7 +20,7 @@ exports.listPrintQueue = async (req, res) => {
 
     res.status(200).json({ status: 'ok', count: items.length, items });
   } catch (err) {
-    console.error('Error listando cola de impresiÃ³n:', err.message);
+    console.error('Error listando cola de impresión:', err.message);
     res.status(500).json({ status: 'error', message: 'Error interno', error: err.message });
   }
 };
@@ -37,7 +37,7 @@ exports.updatePrintQueueStatus = async (req, res) => {
     if (!allowed.includes(status)) {
       return res.status(400).json({
         status: 'error',
-        message: `Estado invÃ¡lido. Valores permitidos: ${allowed.join(', ')}`,
+        message: `Estado inválido. Valores permitidos: ${allowed.join(', ')}`,
       });
     }
 
@@ -114,9 +114,9 @@ exports.renderPrintQueueHtml = async (req, res) => {
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Cola de ImpresiÃ³n</title>
+  <title>Cola de Impresión</title>
   <style>
-    body { font-family: Inter, system-ui, Arial, sans-serif; background:#f7f7fb; margin:24px; color:#1f2937; }
+    body { font-family: Arial, sans-serif; background:#f7f7fb; margin:24px; color:#1f2937; }
     h1 { font-size: 22px; margin-bottom: 12px; }
     .toolbar { display:flex; gap:12px; align-items:center; margin: 10px 0 16px; }
     .pill { background:#eef2ff; color:#4f46e5; border-radius:999px; padding:6px 10px; font-size:12px; }
@@ -143,7 +143,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
   </script>
   </head>
   <body>
-    <h1>Cola de ImpresiÃ³n</h1>
+    <h1>Cola de Impresión</h1>
     <div class="toolbar">
       <span class="pill">Origen: /printqueue</span>
       <span class="pill">Actualizado: ${esc(new Date().toLocaleString('es-CR'))}</span>
@@ -188,7 +188,7 @@ exports.renderPrintQueueHtml = async (req, res) => {
   }
 };
 
-// Devuelve JSON de un item puntual (apoyo para el botÃ³n VER)
+// Devuelve JSON de un item puntual (apoyo para el botón VER)
 async function getPrintQueueItemHandler(req, res) {
   try {
     const { id } = req.params;
@@ -220,7 +220,7 @@ exports.imprimirEtiqueta = async (req, res) => {
     const formatAmount = (val) => (val == null || Number.isNaN(val) ? '' : new Intl.NumberFormat('es-CR', { style: 'currency', currency: currency || 'USD' }).format(val));
     const createdAt = f.DATE_CREATE ? new Date(f.DATE_CREATE) : null;
     const linkUrl = queueId ? `${QR_LINK_BASE}/${encodeURIComponent(queueId)}` : '';
-    const qrUrl = linkUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(linkUrl)}` : null;
+    const qrUrl = linkUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkUrl)}` : null;
     const status = item.status || 'pendiente';
     const statusLabel = ({ pendiente: 'Pendiente', procesando: 'Procesando', impreso: 'Impreso', error: 'Error' })[status] || status;
 
@@ -249,10 +249,11 @@ exports.imprimirEtiqueta = async (req, res) => {
   <meta charset="utf-8" />
   <title>Etiqueta</title>
   <style>
-    @page { size: 100mm 120mm; margin: 5mm; }
-    body { margin: 0; font-family: Arial, sans-serif; }
+    @page { size: 100mm 100mm; margin: 3mm; }
+    body { margin: 1mm; font-family: Arial; }
+    .label, .label * { font-family: Arial; }
     .label {
-      width: 100mm; height: 120mm; padding: 4mm; box-sizing: border-box;
+      width: 100mm; height: 100mm; padding: 0mm; box-sizing: border-box;
       display: flex; flex-direction: column; justify-content: space-between;
       border: 1px solid #000;
     }
@@ -261,15 +262,38 @@ exports.imprimirEtiqueta = async (req, res) => {
     .col-remitente { width: calc(100% - 30mm); }  
     .col-qr { width:26mm;   margin-left: auto; display: flex; justify-content: flex-end;  align-items: flex-start;}
     .logo { width: 100%; text-align: center; }
-    .logo img { max-width: 100%; }  
-    .small { font-size: 11pt; color: #333; }
+    .logo img {
+      max-width: 100%;
+      height: auto;
+      image-rendering: crisp-edges; /* o pixelated; prueba cuál se ve mejor */
+    }
+    .small { 
+      font-size: 10pt;   /* texto normal (remitente, destinatario, etc.) */
+      color: #000;       /* negro sólido, no gris */
+    }
     .strong { font-weight: 600; }
-    .qr { width: 25mm; height: 25mm; margin-left: auto; display: flex; justify-content: flex-end;  align-items: flex-start;}
+    .qr {
+      width: 25mm;
+      height: 25mm;
+    }
     .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; }
-    .cell { border: 1px solid #000; padding: 2mm; font-size: 9pt; }
-    .guia { font-weight: bold; font-size: 11pt; }
+    .cell { 
+      border: 1px solid #000; 
+      padding: 0mm; 
+      font-size: 9pt;    /* PBX / WhatsApp */
+    }
+    .guia { 
+      font-weight: 700;  /* negrita fuerte */
+      font-size: 16pt;   /* número de GUÍA grande */
+    }
     table.attempts { width: 100%; border-collapse: collapse; }
-    table.attempts th, table.attempts td { border: 2px solid #000; padding: 2mm; text-align: center; font-size: 9pt; }
+    table.attempts th,
+    table.attempts td {
+      border: 2px solid #000;
+      padding: 2mm;
+      text-align: center;
+      font-size: 9pt;    /* “Intento 1/2/3” */
+    }
   </style>
   <script>window.onload = function(){ window.print && window.print(); };</script>
 </head>
